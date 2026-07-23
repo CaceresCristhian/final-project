@@ -252,21 +252,72 @@ with tab_decoupling:
     ].sort_values(['Country', 'Year'])
     
     if not df_dec.empty:
-        fig_dec = px.line(
+        # Calculate Economic Carbon Intensity (kg CO2 per USD of GDP)
+        df_dec['CarbonIntensityGDP'] = (df_dec['co2_per_capita'] * 1000) / df_dec['gdp_per_capita']
+        
+        # Plot 1: Carbon Intensity of GDP over Time
+        fig_dec1 = px.line(
             df_dec,
-            x='gdp_per_capita',
-            y='co2_per_capita',
+            x='Year',
+            y='CarbonIntensityGDP',
             color='Country',
             markers=True,
-            hover_data=['Year']
         )
-        fig_dec.update_layout(
-            title="<b>Decoupling Frontier: GDP per Capita vs. CO2 per Capita (2000-2020)</b>",
-            xaxis_title="GDP per Capita (USD, PPP adjusted)",
-            yaxis_title="CO2 per Capita (Metric Tons)",
-            template="plotly_white"
+        fig_dec1 = apply_layout_styling(
+            fig_dec1,
+            "<b>Economic Carbon Intensity: Steady Drop in CO2 Emitted per Dollar of GDP</b>",
+            "Year",
+            "Carbon Intensity of GDP (kg CO2 / USD)"
         )
-        st.plotly_chart(fig_dec, use_container_width=True)
+        st.plotly_chart(fig_dec1, use_container_width=True)
+        
+        st.markdown("---")
+        st.subheader(f"🔍 Deep Dive: Dual-Axis Decoupling Timeline for {selected_country}")
+        
+        # Plot 2: Dual Axis for Selected Country
+        df_select = df[
+            (df['Country'] == selected_country) &
+            (df['Year'] >= year_range[0]) &
+            (df['Year'] <= year_range[1])
+        ].sort_values('Year')
+        
+        if not df_select.empty:
+            fig_dec2 = go.Figure()
+            
+            fig_dec2.add_trace(go.Scatter(
+                x=df_select['Year'],
+                y=df_select['gdp_per_capita'],
+                name='GDP per Capita (USD)',
+                line=dict(color=CVD_GREEN, width=3)
+            ))
+            
+            fig_dec2.add_trace(go.Scatter(
+                x=df_select['Year'],
+                y=df_select['co2_per_capita'],
+                name='CO2 per Capita (Tons)',
+                yaxis='y2',
+                line=dict(color=CVD_HIGHLIGHT, width=3, dash='dash')
+            ))
+            
+            fig_dec2.update_layout(
+                yaxis2=dict(
+                    title='CO2 per Capita (Tons)',
+                    overlaying='y',
+                    side='right',
+                    showgrid=False
+                ),
+                legend=dict(x=0.01, y=0.99, bgcolor='rgba(255,255,255,0.7)')
+            )
+            
+            fig_dec2 = apply_layout_styling(
+                fig_dec2,
+                f"<b>Decoupling Timeline: GDP Rises as Carbon Footprint Declines in {selected_country}</b>",
+                "Year",
+                "GDP per Capita (USD)"
+            )
+            st.plotly_chart(fig_dec2, use_container_width=True)
+        else:
+            st.warning("No details found for the selected country.")
     else:
         st.warning("Please select at least one country with valid data.")
 
