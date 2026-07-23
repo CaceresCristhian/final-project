@@ -132,10 +132,10 @@ with tab_forecast:
         if val is None:
             return None
         if to_unit == "Celsius (°C)":
-            return round((val - 32) * (5/9), 2)
-        return round(val, 2)
+            return round((val - 32) * (5/9), 1)
+        return round(val, 1)
     
-    mae_display = round(raw_mae * (5/9), 2) if temp_unit == "Celsius (°C)" else round(raw_mae, 2)
+    mae_display = round(raw_mae * (5/9), 1) if temp_unit == "Celsius (°C)" else round(raw_mae, 1)
     unit_str = "°C" if temp_unit == "Celsius (°C)" else "°F"
     
     # Render Metric Cards
@@ -362,10 +362,19 @@ with tab_maps:
         color=map_metric,
         hover_name='Country',
         color_continuous_scale=px.colors.sequential.OrRd if map_metric != "AnnualMeanTemp" else px.colors.diverging.RdYlBu_r,
-        scope='europe'
+        scope='europe',
+        height=680  # Increase height
     )
     fig_map.update_layout(
-        title=f"<b>Geographic Distribution of {map_metric} in Europe ({map_year})</b>",
+        title={
+            'text': f"<b>Geographic Distribution of {map_metric} in Europe ({map_year})</b>",
+            'y': 0.96,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top',
+            'font': {'size': 18, 'color': '#2c3e50', 'family': 'Arial'}
+        },
+        margin=dict(l=0, r=0, t=50, b=0),  # Remove margins to utilize full width
         template="plotly_white"
     )
     st.plotly_chart(fig_map, use_container_width=True)

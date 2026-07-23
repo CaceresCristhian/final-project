@@ -108,6 +108,10 @@ df_merged = pd.merge(df_merged, df_energy, on=['Country', 'Year'], how='left')
 
 # Save to processed directory
 output_file = "data/processed/combined_climate_energy.csv"
+# Round temperature averages and volatility to the first decimal
+df_merged['AnnualMeanTemp'] = df_merged['AnnualMeanTemp'].round(1)
+df_merged['TempVolatility'] = df_merged['TempVolatility'].round(1)
+
 df_merged.to_csv(output_file, index=False)
 print(f"[OK] Combined climate-energy dataset saved to {output_file} ({len(df_merged)} rows)")
 
