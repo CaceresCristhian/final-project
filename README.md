@@ -48,7 +48,7 @@ All charts in this portfolio adhere to strict visual guidelines:
 The Jupyter Notebook explores these 10 multi-dimensional inquiries:
 1.  **Regional Temperature Anomalies:** Geographical choropleth tracking warming trends from 2005 to 2020.
 2.  **CO2 Footprint vs. Temperature Volatility:** Scatterplot with marginal distributions comparing cumulative emissions to seasonal variance.
-3.  **The Decoupling Frontier:** Trajectory paths tracking $(GDP\_per\_capita, CO2\_per\_capita)$ since 2000 for Spain, Germany, France, and the UK.
+3.  **Economic Carbon Decoupling:** Line charts of Carbon Intensity of GDP (kg CO2/GDP) vs. Year, and Dual-Axis timelines of GDP vs. CO2 over time, showing decoupling dynamics.
 4.  **Grid Composition Evolution:** Faceted area chart mapping the transition of coal, gas, nuclear, wind, and solar grids.
 5.  **Coal-to-Renewables Displacement:** Dual-axis visualization showing fossil fuel reduction vs. renewable growth and electricity carbon intensity (gCO2/kWh) in Spain.
 6.  **Low-Carbon Share vs. Carbon Intensity:** Scatterplot with OLS regression comparing renewable/nuclear mix vs. electricity emissions.

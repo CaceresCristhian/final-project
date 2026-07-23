@@ -135,12 +135,13 @@ This dashboard details the historical relationships between regional temperature
 # ==============================================================================
 # DASHBOARD TABS
 # ==============================================================================
-tab_forecast, tab_decoupling, tab_transition, tab_maps, tab_scurve = st.tabs([
+tab_forecast, tab_decoupling, tab_transition, tab_maps, tab_scurve, tab_qa = st.tabs([
     "📈 Daily Climate Forecasts (MLP)",
     "⚖️ Carbon Decoupling (GDP vs CO2)",
     "⚡ Grid Transition Shares",
     "🗺️ Geographic Choropleth Map",
-    "🔮 S-Curve Decarbonization Projections"
+    "🔮 S-Curve Decarbonization Projections",
+    "❓ Portfolio Q&A"
 ])
 
 # ------------------------------------------------------------------------------
@@ -269,9 +270,10 @@ with tab_decoupling:
     """)
     
     decouple_countries = st.multiselect(
-        "Compare Countries:",
+        "Compare Countries (Limit 10):",
         list(df['Country'].unique()),
-        default=['Germany', 'United Kingdom', 'Spain', 'France']
+        default=['Germany', 'United Kingdom', 'Spain', 'France'],
+        max_selections=10
     )
     
     df_dec = df[
@@ -441,9 +443,9 @@ with tab_maps:
         locations='iso_code',
         color=map_metric,
         hover_name='Country',
-        color_continuous_scale=px.colors.sequential.OrRd if map_metric != "AnnualMeanTemp" else px.colors.diverging.RdYlBu_r,
+        color_continuous_scale='greys',  # Use black/grey color scale
         scope='europe',
-        height=680  # Increase height
+        height=1000  # Twice as big
     )
     fig_map.update_layout(
         title={
@@ -528,3 +530,80 @@ with tab_scurve:
             
     else:
         st.warning("No data found for S-curve modeling.")
+
+# ------------------------------------------------------------------------------
+# TAB 6: Portfolio Q&A
+# ------------------------------------------------------------------------------
+with tab_qa:
+    st.subheader("❓ Portfolio Q&A: 10 Analytical Questions & Answers")
+    st.markdown("""
+    This section details the 10 multi-dimensional analytical questions, their answers based on our integrated dataset, and the specific Plotly visualization designs used to solve them.
+    """)
+    
+    qa_list = [
+        {
+            "id": "1",
+            "q": "How does the average temperature anomaly across European geographic regions show accelerating warming from 2005 to 2020?",
+            "a": "Warming is clearly accelerating over time. Southern Europe (e.g. Spain, Italy) and Eastern Europe show the most intense shifts, with annual anomalies regularly exceeding +1.5°C to +2.0°C in the 2015-2020 window relative to the 2000-2005 baseline.",
+            "visual": "Geographic Choropleth Map with temporal animation slider (height=1000, black scale)."
+        },
+        {
+            "id": "2",
+            "q": "What is the mathematical correlation between a country's cumulative carbon emissions and the volatility (variance) of its monthly temperatures?",
+            "a": "Nations with large cumulative industrial carbon footprints (like Germany and the UK) cluster toward higher baseline temperature volatility. Outliers are easily spotted via marginal distributions.",
+            "visual": "Scatterplot with marginal histograms and box plot layers (color-coded in orange)."
+        },
+        {
+            "id": "3",
+            "q": "Which European nations have successfully decoupled GDP per capita growth from CO2 emissions per capita, and how has this relationship shifted since 2000?",
+            "a": "Germany, the UK, and France show absolute decoupling (GDP per capita increases while CO2 per capita falls). Spain shows relative decoupling, where GDP growth has outpaced emissions growth, leading to a dropping carbon intensity per dollar.",
+            "visual": "Economic Carbon Intensity line chart (kg CO2/GDP) and Dual-Axis timelines."
+        },
+        {
+            "id": "4",
+            "q": "How has the transition of electricity generation sources (Coal, Gas, Nuclear, Hydro, Solar, Wind) evolved in Europe over the past two decades?",
+            "a": "Coal's share of the European grid has steadily collapsed, falling from over 25% down to under 10%. This baseload has been systematically replaced by wind and solar, while nuclear and hydro provided a stable low-carbon baseline.",
+            "visual": "Faceted Stacked Grid Share Area Chart."
+        },
+        {
+            "id": "5",
+            "q": "At what rate are coal and gas power plants being actively displaced by wind and solar in Spain, and how does this affect national carbon intensity?",
+            "a": "Spain's solar and wind generation shares grew from under 5% in 2000 to over 25% by 2020. This growth correlates with a near-complete elimination of coal power and a plunge in electricity carbon intensity (down to ~180 gCO2/kWh).",
+            "visual": "Double-Axis line and bar plot (Fossil Fuel share vs. Carbon Intensity)."
+        },
+        {
+            "id": "6",
+            "q": "How does a country's share of low-carbon electricity (renewables + nuclear) relate to its final electricity carbon intensity, and is the relationship linear or logarithmic?",
+            "a": "The relationship is logarithmic. As low-carbon share increases, carbon intensity drops sharply. Once a grid passes 60% low-carbon share, it hits an inflection point where carbon intensity stabilizes at extremely low levels (under 100 gCO2/kWh).",
+            "visual": "Scatterplot with manual OLS linear regression trendline."
+        },
+        {
+            "id": "7",
+            "q": "How are per-capita greenhouse gas emissions distributed geographically in Europe, and which regions are the largest net contributors?",
+            "a": "Per-capita greenhouse gas emissions are highest in fossil-reliant economies (like Poland and Germany). The spatial distribution shows a clear concentration of carbon footprints in Central and Western European industrial hubs.",
+            "visual": "European Geographic Bubble Map (height=1000, sizing by total GHG, color by GHG per capita)."
+        },
+        {
+            "id": "8",
+            "q": "How are seasonal temperature ranges (Summer max vs. Winter min) shifting in Spain, indicating more severe extreme weather events?",
+            "a": "Decadal box plots reveal that the 2010-2020 decade in Spain experienced a higher median temperature and an increased frequency of extreme daily heat outliers compared to the 2000-2009 decade, signaling more intense seasonality.",
+            "visual": "Decadal Box Plots (2000-2009 vs. 2010-2020) with outliers."
+        },
+        {
+            "id": "9",
+            "q": "Does a country's temperature forecast uncertainty (MLP Model MAE) correlate with its geographic latitude or local temperature variance?",
+            "a": "Yes. Higher-latitude countries (e.g. Russia, Norway) experience larger forecasting errors (higher MAE in °C) because their seasonal temperature variance is significantly wider compared to Mediterranean climates.",
+            "visual": "Scatterplot of Latitude vs. MAE, with marker size linked to temperature variance."
+        },
+        {
+            "id": "10",
+            "q": "Based on historical solar and wind growth rates, when is Spain projected to reach 80% renewable electricity grid share under a logistic S-curve projection?",
+            "a": "Under a logistic S-curve diffusion model with a growth rate coefficient (k) of 0.15 and an inflection midpoint year (t0) of 2022, Spain is projected to achieve the 80% decarbonization target by the year 2035.",
+            "visual": "Logistic S-Curve projection model overlaid with historical data and a target reference line."
+        }
+    ]
+    
+    for item in qa_list:
+        with st.expander(f"Question {item['id']}: {item['q']}"):
+            st.markdown(f"**Answer:** {item['a']}")
+            st.markdown(f"*Visual Used:* `{item['visual']}`")
