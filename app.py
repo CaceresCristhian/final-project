@@ -6,6 +6,35 @@ import plotly.graph_objects as go
 import json
 import os
 
+# Define CVD-Safe global design variables
+CVD_HIGHLIGHT = '#d95f02' # Orange highlight
+CVD_MUTED_GREY = '#7570b3' # Purple-grey context
+CVD_GREEN = '#1b9e77'     # Teal-green
+PLOT_TEMPLATE = 'plotly_white'
+
+def apply_layout_styling(fig, title, xaxis_title, yaxis_title):
+    fig.update_layout(
+        title={ 
+            'text': title,
+            'y':0.95,
+            'x':0.5,
+            'xanchor': 'center',
+            'yanchor': 'top',
+            'font': {'size': 16, 'color': '#2c3e50', 'family': 'Arial'}
+        },
+        xaxis_title=xaxis_title,
+        yaxis_title=yaxis_title,
+        template=PLOT_TEMPLATE,
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(l=40, r=40, t=60, b=40),
+        hovermode='closest'
+    )
+    fig.update_xaxes(showgrid=True, gridcolor='#e0e0e0', showline=True, linecolor='#cccccc')
+    fig.update_yaxes(showgrid=True, gridcolor='#e0e0e0', showline=True, linecolor='#cccccc')
+    return fig
+
+
 # ==============================================================================
 # STREAMLIT PAGE CONFIGURATION & CUSTOM STYLE
 # ==============================================================================
