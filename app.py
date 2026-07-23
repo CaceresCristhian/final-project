@@ -12,6 +12,46 @@ CVD_MUTED_GREY = '#7570b3' # Purple-grey context
 CVD_GREEN = '#1b9e77'     # Teal-green
 PLOT_TEMPLATE = 'plotly_white'
 
+import urllib.request
+
+# Coordinates of European Capital Cities to query Open-Meteo API
+CAPITAL_COORDINATES = {
+    'Spain': (40.4168, -3.7038),       # Madrid
+    'Germany': (52.5200, 13.4050),     # Berlin
+    'France': (48.8566, 2.3522),       # Paris
+    'United Kingdom': (51.5074, -0.1278), # London
+    'Italy': (41.9028, 12.4964),       # Rome
+    'Austria': (48.2082, 16.3738),     # Vienna
+    'Belgium': (50.8503, 4.3517),      # Brussels
+    'Denmark': (55.6761, 12.5683),     # Copenhagen
+    'Finland': (60.1699, 24.9384),     # Helsinki
+    'Norway': (59.9139, 10.7522),      # Oslo
+    'Sweden': (59.3293, 18.0686),      # Stockholm
+    'Switzerland': (46.9480, 7.4474),  # Bern
+    'Portugal': (38.7223, -9.1393),    # Lisbon
+    'Greece': (37.9838, 23.7275),      # Athens
+    'Ireland': (53.3498, -6.2603),     # Dublin
+    'The Netherlands': (52.3676, 4.9041), # Amsterdam
+    'Poland': (52.2297, 21.0122),      # Warsaw
+    'Hungary': (47.4979, 19.0402),     # Budapest
+    'Bulgaria': (42.6977, 23.3219),    # Sofia
+    'Romania': (44.4268, 26.1025),     # Bucharest
+    'Ukraine': (50.4501, 30.5234),     # Kyiv
+    'Russia': (55.7558, 37.6173),      # Moscow
+    'Turkey': (39.9334, 32.8597),      # Ankara
+    'Iceland': (64.1466, -21.9426)     # Reykjavik
+}
+
+def fetch_live_weather(lat, lon):
+    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=4) as response:
+            data = json.loads(response.read().decode())
+            return data
+    except Exception:
+        return None
+
 def apply_layout_styling(fig, title, xaxis_title, yaxis_title):
     fig.update_layout(
         title={ 
@@ -96,7 +136,7 @@ countries_list = sorted(list(forecast_data.keys()))
 # ==============================================================================
 # SIDEBAR CONTROL PANEL
 # ==============================================================================
-st.sidebar.image("https://img.icons8.com/color/96/000000/earth-globe.png", width=80)
+st.sidebar.markdown("<h1 style='text-align: center; margin-bottom: 10px; font-size: 72px;'>🌍</h1>", unsafe_allow_html=True)
 st.sidebar.title("Navigation & Filters")
 st.sidebar.markdown("---")
 
@@ -193,6 +233,20 @@ with tab_forecast:
             value=f"{std_val:.1f} {unit_str}"
         )
         
+    # Live Weather API integration for Capital city of the selected country
+    coords = CAPITAL_COORDINATES.get(selected_country)
+    if coords:
+        lat, lon = coords
+        live_data = fetch_live_weather(lat, lon)
+        if live_data and 'current_weather' in live_data:
+            current = live_data['current_weather']
+            live_temp = current['temperature']
+            if temp_unit == "Fahrenheit (°F)":
+                live_temp = (live_temp * 9/5) + 32
+            st.info(f"🌤️ **Real-time Live Weather in Capital of {selected_country}**: {live_temp:.1f} {unit_str} (Wind Speed: {current['windspeed']} km/h). Compare this live observation with the MLP Model historical ranges below!")
+        else:
+            st.warning("⚠️ Live weather API query timed out. Using historical model forecast values only.")
+
     st.markdown("---")
     
     # Build chart data
